@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "EnemyCfg", menuName = "SpaceInvaders/EnemyConfiguration")]
-public class EnemyData : ScriptableObject
+[CreateAssetMenu(fileName = "BricCfg", menuName = "SpaceInvaders/BricConfiguration")]
+public class BricData : ScriptableObject
 {
     [System.Serializable]
-    public class EnemyType
+    public class BricType
     {
         public string name;
         public int points;
@@ -14,5 +14,5 @@ public class EnemyData : ScriptableObject
 
     }
 
-    public List<EnemyType> enemyTypes;
+    public List<BricType> bricTypes;
 }

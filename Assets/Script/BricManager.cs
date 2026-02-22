@@ -1,15 +1,15 @@
-
+﻿
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyManager : MonoBehaviour
+public class BricManager : MonoBehaviour
 {
     [SerializeField]
     private GameObject player;
     private float playerBoundaryX;
 
-    public EnemyPool enemyPool;
+    public BricPool bricPool;
     public int rows = 5;
     public int cols = 11;
     public float spacing = 1.5f;
@@ -17,7 +17,7 @@ public class EnemyManager : MonoBehaviour
 
     public Vector2 startPosition = new Vector2(0, -4);
 
-    private GameObject[,] enemies;
+    private GameObject[,] brics;
     private int reverseGrave;
 
     private bool isPaused = false;
@@ -30,43 +30,43 @@ public class EnemyManager : MonoBehaviour
     void Start()
     {
         playerBoundaryX = player.GetComponent<PlayerScript>().boundary;
-        enemies = new GameObject[rows, cols];
+        brics = new GameObject[rows, cols];
 
-        SpawnEnemies();
+        SpawnBrics();
     }
 
     private void Update()
     {
         time += Time.deltaTime;
 
-        if (time == 5)
+        if (time >= 5)
         {
             time = 0;
-            StartCoroutine(MoveAllEnemiesDown());
+            StartCoroutine(MoveAllBricsDown());
         }
     }
 
-    private void SpawnEnemies()
+    private void SpawnBrics()
     {
-        var enemyTypes = enemyPool.GetEnemyTypes();
+        var bricTypes = bricPool.GetBricsTypes();
 
         for (int row = 0; row < rows; row++)
         {
-            var enemyType = GetEnemyTypeForRow(row, enemyTypes);
+            var bricType = GetBricsTypeForRow(row, bricTypes);
             for (int col = 0; col < cols; col++)
             {
-                GameObject enemy = enemyPool.GetEnemy(enemyType.prefab);
+                GameObject bric = bricPool.GetBrics(bricType.prefab);
 
-                if (enemy != null)
+                if (bric != null)
                 {
                     float xPos = startPosition.x + (col * spacing);
                     float yPos = startPosition.y - (row * spacing);
 
-                    Debug.Log($"[EnemyManager] {enemy.name} est � la position X: {xPos}; Y: {yPos}");
+                    Debug.Log($"[EnemyManager] {bric.name} est à la position X: {xPos}; Y: {yPos}");
 
-                    enemy.transform.position = new Vector3(xPos, yPos, 0);
+                    bric.transform.position = new Vector3(xPos, yPos, 0);
 
-                    enemies[row, col] = enemy;
+                    brics[row, col] = bric;
 
                     reverseGrave++;
                 }
@@ -74,92 +74,90 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    IEnumerator MoveAllEnemiesDown()
+    IEnumerator MoveAllBricsDown()
     {
         for (int row = rows - 1; row >= 0; row--)
         {
             for (int col = 0; col < cols; col++)
             {
-                if (enemies[row, col] != null && enemies[row, col].activeSelf)
+                if (brics[row, col] != null && brics[row, col].activeSelf)
                 {
                     Vector3 direction = Vector3.down;
 
-                    MoveEnemy(enemies[row, col], direction, stepDistanceVertical);
-
-                    yield return null;
+                    MoveBrics(brics[row, col], direction, stepDistanceVertical);
                 }
             }
         }
+        yield break;
     }
 
-    private List<GameObject> GetBottomEnemies()
+    private int GetTopActiveRow()
     {
-        List<GameObject> bottomeEnemies = new List<GameObject>();
-
-        for (int col = 0; col < cols; col++)
+        for (int row = 0; row < rows; row++)
         {
-            for (int row = rows - 1; row >= 0; row--)
+            for (int col = 0; col < cols; col++)
             {
-                if (enemies[row, col] != null && enemies[row, col].activeSelf)
+                if (brics[row, col] != null && brics[row, col].activeSelf)
                 {
-                    bottomeEnemies.Add(enemies[row, col]);
-                    break;
+                    return row;
                 }
             }
         }
 
-        return bottomeEnemies;
+        return rows - 1;
     }
 
-    private void MoveEnemy(GameObject enemy, Vector3 direction, float stepDistance)
+    private void MoveBrics(GameObject bric, Vector3 direction, float stepDistance)
     {
-        if (enemy == null) return;
+        if (bric == null) return;
 
-        Vector3 newPosition = enemy.transform.position + direction * stepDistance;
+        Vector3 newPosition = bric.transform.position + direction * stepDistance;
 
         newPosition.x = Mathf.Round(newPosition.x * 100f) / 100f;
         newPosition.y = Mathf.Round(newPosition.y * 100f) / 100f;
         newPosition.z = Mathf.Round(newPosition.z * 100f) / 100f;
 
-        enemy.transform.position = newPosition;
+        bric.transform.position = newPosition;
 
-        EnemyBottom(enemy, direction);
+        BricBottom(bric, direction);
     }
 
-    private void EnemyBottom(GameObject enemy, Vector3 direction)
+    private void BricBottom(GameObject enemy, Vector3 direction)
     {
         if (enemy == null) return;
 
         Vector3 newPosition = enemy.transform.position;
     }
 
-    public void ReturnEnemy(GameObject enemy, GameObject prefab)
+    public void ReturnBric(GameObject enemy, GameObject prefab)
     {
         for (int row = 0; row < rows; row++)
         {
             for (int col = 0; col < cols; col++)
             {
-                if (enemies[row, col] == enemy)
+                if (brics[row, col] == enemy)
                 {
-                    enemies[row, col] = null;
+                    brics[row, col] = null;
+
+                    return;
                 }
             }
         }
     }
 
-    private EnemyData.EnemyType GetEnemyTypeForRow(int row, List<EnemyData.EnemyType> enemyTypes)
+    private BricData.BricType GetBricsTypeForRow(int row, List<BricData.BricType> bricTypes)
     {
         if (row <= 2)
         {
-            return enemyTypes[2];
+            return bricTypes[2];
         }
         else if (row <= 5)
         {
-            return enemyTypes[1];
+            return bricTypes[1];
         }
         else
         {
-            return enemyTypes[0];
+            return bricTypes[0];
         }
     }
 }

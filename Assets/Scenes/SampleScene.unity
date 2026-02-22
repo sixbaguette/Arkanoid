@@ -373,7 +373,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 536948077}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -456,7 +456,7 @@ Transform:
   m_GameObject: {fileID: 536948077}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.658428, y: 1.8949901, z: 0}
+  m_LocalPosition: {x: 0, y: -3.4, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -474,7 +474,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59ce059d2f870fd4696f3fccccceed52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
+  paddle: {fileID: 2113015319}
+  paddleWidth: 1.5
+  paddleHeight: 0.2
+  ballRadius: 0.15
+  speed: 5
   origin: {x: 0, y: 0}
   reflected: {x: 0, y: 0}
   direction: {x: 0, y: 0}
@@ -751,7 +755,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e9f14d8aae2aca48842a9d0c945bac0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyData: {fileID: 11400000, guid: d0c814197a7a9774fba4ac98d53ede7d, type: 2}
+  bricData: {fileID: 11400000, guid: d0c814197a7a9774fba4ac98d53ede7d, type: 2}
 --- !u!114 &1892441364
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -765,12 +769,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 2113015317}
-  enemyPool: {fileID: 1892441363}
+  bricPool: {fileID: 1892441363}
   rows: 9
   cols: 10
-  spacing: 1.2
+  spacing: 1.1
   stepDistanceVertical: 1
-  startPosition: {x: -5.25, y: 20}
+  startPosition: {x: -4.75, y: 11}
 --- !u!4 &1892441365
 Transform:
   m_ObjectHideFlags: 0

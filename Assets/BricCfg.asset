@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 491edb69583c7c74fbc29d33e9228a85, type: 3}
-  m_Name: EnemyCfg
+  m_Name: BricCfg
   m_EditorClassIdentifier: 
-  enemyTypes:
-  - name: 1
-    points: 0
+  bricTypes:
+  - name: Bric1
+    points: 10
     color: {r: 1, g: 0, b: 0, a: 0}
     prefab: {fileID: 3942447529587130283, guid: 711b7345d6c9b4f4f86c30aefa5e88e9, type: 3}
-  - name: 2
-    points: 0
-    color: {r: 0.12300229, g: 1, b: 0, a: 0}
+  - name: Bric2
+    points: 20
+    color: {r: 0.17054713, g: 1, b: 0, a: 0}
     prefab: {fileID: 4389196147016783211, guid: 095334eb0c39b98448d6494e87d99291, type: 3}
-  - name: 3
-    points: 0
-    color: {r: 0, g: 0.020182133, b: 1, a: 0}
+  - name: Bric3
+    points: 30
+    color: {r: 0, g: 0.024693727, b: 1, a: 0}
     prefab: {fileID: 368719158996272675, guid: 1e3440182c08c2c4ba7b70e7585ef494, type: 3}
