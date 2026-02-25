@@ -3,10 +3,24 @@ using UnityEngine;
 
 public class BricPool : MonoBehaviour
 {
+    public static BricPool Instance;
+
     [SerializeField]
     private BricData bricData;
 
     private Dictionary<GameObject, Queue<GameObject>> poolDictionary = new Dictionary<GameObject, Queue<GameObject>>();
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {

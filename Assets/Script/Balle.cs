@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class Balle : MonoBehaviour
@@ -29,6 +28,9 @@ public class Balle : MonoBehaviour
 
     private Vector2 previousPosition;
 
+    private bool IsOut = true;
+    private bool IsAttached = true;
+
     private void Awake()
     {
         PlayerScript = GameObject.Find("Paddle").GetComponent<PlayerScript>();
@@ -44,12 +46,26 @@ public class Balle : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            transform.position = new Vector3(paddle.position.x, paddle.position.y + 0.5f, 0f);
             direction = new Vector2(1f, 1f).normalized;
+            IsAttached = true;
+        }
+
+        if (IsAttached)
+        {
+            transform.position = new Vector3(paddle.position.x, paddle.position.y + 0.5f, 0f);
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                direction = new Vector2(1f, 1f).normalized;
+                IsAttached = false;
+                IsOut = false;
+            }
+            return;
         }
 
         CheckBounds();
         CheckPaddleCollision();
+        CheckBrickCollision();
 
         previousPosition = transform.position;
         transform.Translate(direction * speed * Time.deltaTime);
@@ -137,7 +153,23 @@ public class Balle : MonoBehaviour
         else if (pos.y <= -boundaryY + ballRadius)
         {
             direction = Vector2.zero;
-            transform.position = new Vector3(paddle.position.x, paddle.position.y + 0.5f, 0);
+            IsOut = true;
+            IsAttached = true;
+        }
+    }
+
+    private void CheckBrickCollision()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, ballRadius);
+        foreach (var hit in hits)
+        {
+            if (hit.CompareTag("Brick"))
+            {
+                Vector3 normal = (transform.position - hit.transform.position).normalized;
+                direction = Vector3.Reflect(direction, normal).normalized;
+
+                BricPool.Instance.ReturnToPool(hit.gameObject, hit.gameObject);
+            }
         }
     }
 }

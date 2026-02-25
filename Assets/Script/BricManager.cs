@@ -9,6 +9,8 @@ public class BricManager : MonoBehaviour
     private GameObject player;
     private float playerBoundaryX;
 
+    public float t;
+
     public BricPool bricPool;
     public int rows = 5;
     public int cols = 11;
@@ -39,7 +41,7 @@ public class BricManager : MonoBehaviour
     {
         time += Time.deltaTime;
 
-        if (time >= 5)
+        if (time >= t)
         {
             time = 0;
             StartCoroutine(MoveAllBricsDown());
