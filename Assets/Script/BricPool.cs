@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class BricPool : MonoBehaviour
@@ -30,7 +30,7 @@ public class BricPool : MonoBehaviour
 
             if (poolDictionary.ContainsKey(bricType.prefab))
             {
-                Debug.Log($"Le prefab {bricType.prefab.name} pour le type {bricType.name}" + $"est déjà dans le pool");
+                Debug.Log($"Le prefab {bricType.prefab.name} pour le type {bricType.name}" + $"est dÃ©jÃ  dans le pool");
                 continue;
             }
 
@@ -41,6 +41,13 @@ public class BricPool : MonoBehaviour
             for (int j = 0; j < poolSize; j++)
             {
                 GameObject bric = Instantiate(bricType.prefab);
+
+                Bric id = bric.GetComponent<Bric>();
+                if (id == null)
+                    id = bric.AddComponent<Bric>();
+
+                id.originalPrefab = bricType.prefab;
+
                 bric.SetActive(false);
                 bricQueue.Enqueue(bric);
             }
@@ -51,12 +58,20 @@ public class BricPool : MonoBehaviour
 
     public GameObject GetBrics(GameObject prefab)
     {
-        if (poolDictionary.TryGetValue(prefab, out Queue<GameObject> bricQueue) && bricQueue.Count > 0)
+        if (poolDictionary.TryGetValue(prefab, out Queue<GameObject> bricQueue))
         {
-            GameObject bric = bricQueue.Dequeue();
-            bric.SetActive(true);
-
-            return bric;
+            if (bricQueue.Count > 0)
+            {
+                GameObject bric = bricQueue.Dequeue();
+                bric.SetActive(true);
+                return bric;
+            }
+            else
+            {
+                // Si vide â†’ on instancie
+                GameObject newBric = Instantiate(prefab);
+                return newBric;
+            }
         }
 
         return null;
@@ -72,7 +87,7 @@ public class BricPool : MonoBehaviour
         }
         else
         {
-            Debug.Log("Tentative de retourner un ennemi à un pool inexistant !");
+            Debug.Log("Tentative de retourner un ennemi Ã  un pool inexistant !");
         }
     }
 

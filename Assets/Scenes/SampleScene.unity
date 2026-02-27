@@ -542,13 +542,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 2113015317}
-  t: 30
+  t: 2
   bricPool: {fileID: 1892441363}
   rows: 9
   cols: 10
   spacing: 1.1
   stepDistanceVertical: 1.1
-  startPosition: {x: -4.75, y: 11}
+  startPosition: {x: -4.75, y: 2.25}
 --- !u!4 &1892441365
 Transform:
   m_ObjectHideFlags: 0

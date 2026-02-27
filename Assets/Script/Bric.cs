@@ -2,5 +2,5 @@ using UnityEngine;
 
 public class Bric : MonoBehaviour
 {
-    public GameObject prefab;
+    public GameObject originalPrefab;
 }

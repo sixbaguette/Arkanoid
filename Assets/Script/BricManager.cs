@@ -19,7 +19,7 @@ public class BricManager : MonoBehaviour
 
     public Vector2 startPosition = new Vector2(0, -4);
 
-    private GameObject[,] brics;
+    private List<List<GameObject>> brics = new List<List<GameObject>>();
     private int reverseGrave;
 
     private bool isPaused = false;
@@ -32,7 +32,6 @@ public class BricManager : MonoBehaviour
     void Start()
     {
         playerBoundaryX = player.GetComponent<PlayerScript>().boundary;
-        brics = new GameObject[rows, cols];
 
         SpawnBrics();
     }
@@ -54,59 +53,42 @@ public class BricManager : MonoBehaviour
 
         for (int row = 0; row < rows; row++)
         {
-            var bricType = GetBricsTypeForRow(row, bricTypes);
-            for (int col = 0; col < cols; col++)
-            {
-                GameObject bric = bricPool.GetBrics(bricType.prefab);
-
-                if (bric != null)
-                {
-                    float xPos = startPosition.x + (col * spacing);
-                    float yPos = startPosition.y - (row * spacing);
-
-                    Debug.Log($"[EnemyManager] {bric.name} est à la position X: {xPos}; Y: {yPos}");
-
-                    bric.transform.position = new Vector3(xPos, yPos, 0);
-
-                    brics[row, col] = bric;
-
-                    reverseGrave++;
-                }
-            }
+            CreateNewTopRow(bricTypes);
         }
     }
 
     IEnumerator MoveAllBricsDown()
     {
-        for (int row = rows - 1; row >= 0; row--)
+        foreach (var row in brics)
         {
-            for (int col = 0; col < cols; col++)
+            foreach (var bric in row)
             {
-                if (brics[row, col] != null && brics[row, col].activeSelf)
+                if (bric != null && bric.activeSelf)
                 {
-                    Vector3 direction = Vector3.down;
-
-                    MoveBrics(brics[row, col], direction, stepDistanceVertical);
+                    bric.transform.position += Vector3.down * stepDistanceVertical;
                 }
             }
         }
-        yield break;
+
+        RemoveBottomRowIfNeeded();
+
+        yield return null;
     }
 
     private int GetTopActiveRow()
     {
-        for (int row = 0; row < rows; row++)
+        for (int row = 0; row < brics.Count; row++)
         {
-            for (int col = 0; col < cols; col++)
+            for (int col = 0; col < brics[row].Count; col++)
             {
-                if (brics[row, col] != null && brics[row, col].activeSelf)
+                if (brics[row][col] != null && brics[row][col].activeSelf)
                 {
                     return row;
                 }
             }
         }
 
-        return rows - 1;
+        return brics.Count - 1;
     }
 
     private void MoveBrics(GameObject bric, Vector3 direction, float stepDistance)
@@ -131,19 +113,40 @@ public class BricManager : MonoBehaviour
         Vector3 newPosition = enemy.transform.position;
     }
 
-    public void ReturnBric(GameObject enemy, GameObject prefab)
+    public void ReturnBric(GameObject enemy)
     {
-        for (int row = 0; row < rows; row++)
-        {
-            for (int col = 0; col < cols; col++)
-            {
-                if (brics[row, col] == enemy)
-                {
-                    brics[row, col] = null;
+        if (enemy == null) return;
 
-                    return;
+        Bric bricData = enemy.GetComponent<Bric>();
+        if (bricData == null) return;
+
+        bricPool.ReturnToPool(enemy, bricData.originalPrefab);
+
+        // Retirer la brique de la grille
+        for (int i = 0; i < brics.Count; i++)
+        {
+            for (int j = 0; j < brics[i].Count; j++)
+            {
+                if (brics[i][j] == enemy)
+                {
+                    brics[i][j] = null;
                 }
             }
+        }
+
+        // Nettoyer les lignes vides
+        for (int i = brics.Count - 1; i >= 0; i--)
+        {
+            if (brics[i].TrueForAll(b => b == null))
+            {
+                brics.RemoveAt(i);
+            }
+        }
+
+        // Créer une nouvelle ligne si le haut est vide
+        if (brics.Count == 0 || brics[0].TrueForAll(b => b == null))
+        {
+            CreateNewTopRow(bricPool.GetBricsTypes());
         }
     }
 
@@ -160,6 +163,87 @@ public class BricManager : MonoBehaviour
         else
         {
             return bricTypes[0];
+        }
+    }
+
+    private void CreateNewTopRow(List<BricData.BricType> bricTypes)
+    {
+        List<GameObject> newRow = new List<GameObject>();
+
+        // Calculer la Y de la nouvelle ligne
+        float yPos;
+
+        if (brics.Count == 0)
+        {
+            // Pas de ligne existante → position de départ
+            yPos = startPosition.y;
+        }
+        else
+        {
+            // Prendre la Y de la ligne la plus haute + spacing
+            float maxY = float.MinValue;
+            foreach (var bric in brics[0]) // ligne du haut
+            {
+                if (bric != null)
+                    maxY = Mathf.Max(maxY, bric.transform.position.y);
+            }
+            yPos = maxY + spacing;
+        }
+
+        for (int col = 0; col < cols; col++)
+        {
+            var randomType = bricTypes[Random.Range(0, bricTypes.Count)];
+            GameObject bric = bricPool.GetBrics(randomType.prefab);
+
+            if (bric != null)
+            {
+                float xPos = startPosition.x + (col * spacing);
+                bric.transform.position = new Vector3(xPos, yPos, 0);
+
+                Bric id = bric.GetComponent<Bric>();
+                if (id == null)
+                    id = bric.AddComponent<Bric>();
+
+                id.originalPrefab = randomType.prefab;
+
+                bric.SetActive(true);
+
+                newRow.Add(bric);
+            }
+        }
+
+        brics.Insert(0, newRow);
+    }
+
+    private void RemoveBottomRowIfNeeded()
+    {
+        if (brics.Count == 0) return;
+
+        var lastRow = brics[brics.Count - 1];
+
+        bool allBelowScreen = true;
+
+        foreach (var bric in lastRow)
+        {
+            if (bric != null && bric.transform.position.y > -4.5f)
+            {
+                allBelowScreen = false;
+                break;
+            }
+        }
+
+        if (allBelowScreen)
+        {
+            foreach (var bric in lastRow)
+            {
+                if (bric != null)
+                {
+                    Bric id = bric.GetComponent<Bric>();
+                    bricPool.ReturnToPool(bric, id.originalPrefab);
+                }
+            }
+
+            brics.RemoveAt(brics.Count - 1);
         }
     }
 }

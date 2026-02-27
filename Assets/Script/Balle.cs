@@ -31,10 +31,13 @@ public class Balle : MonoBehaviour
     private bool IsOut = true;
     private bool IsAttached = true;
 
+    private BricManager bricManager;
+
     private void Awake()
     {
         PlayerScript = GameObject.Find("Paddle").GetComponent<PlayerScript>();
         direction = Vector2.zero;
+        bricManager = FindObjectOfType<BricManager>();
     }
 
     private void Update()
@@ -168,7 +171,11 @@ public class Balle : MonoBehaviour
                 Vector3 normal = (transform.position - hit.transform.position).normalized;
                 direction = Vector3.Reflect(direction, normal).normalized;
 
-                BricPool.Instance.ReturnToPool(hit.gameObject, hit.gameObject);
+                Bric bricScript = hit.GetComponent<Bric>();
+                if (bricScript != null && bricManager != null)
+                {
+                    bricManager.ReturnBric(hit.gameObject);
+                }
             }
         }
     }
